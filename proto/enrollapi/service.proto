@@ -1,0 +1,53 @@
+syntax = "proto3";
+option go_package = "github.hpe.com/langbeck/tpm2-keys/proto/enrollapi";
+
+
+message SigningRequest {
+    bytes platformIdentity = 1;
+    reserved 2;
+
+    bytes endorsementCertificate = 3;
+    bytes endorsementKey = 4;
+
+    bytes attestationKey = 5;
+    bytes devIDKey = 6;
+
+    bytes certifyData = 10;
+    bytes certifySignature = 11;
+}
+
+message SigningResponse {
+    bytes attestationCertificate = 1;
+    bytes devIDCertificate = 2;
+}
+
+
+message RawSigningRequest {
+    bytes data = 1;
+    bytes signature = 2;
+}
+
+message EnrollRequest {
+    oneof RequestOrResponse {
+        RawSigningRequest signingRequest = 1;
+
+        bytes challengeResponse = 2;
+    }
+}
+
+message Challenge {
+    bytes credentialBlob = 1;
+    bytes secret = 2;
+}
+
+
+message EnrollResponse {
+    oneof ChallengeOrResponse {
+        Challenge challenge = 1;
+        SigningResponse signingResponse = 2;
+    }
+}
+
+service Enrollment {
+    rpc Enroll(stream EnrollRequest) returns (stream EnrollResponse);
+}
