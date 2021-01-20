@@ -68,11 +68,7 @@ type AgentConfig struct {
 	SubjectExtras *common.DistinguishedName `hcl:"subject_extras,block"`
 }
 
-type ConfigBase struct {
-	AgentConfig AgentConfig `hcl:"agent,block"`
-}
-
-func parseConfig() (*ConfigBase, error) {
+func parseConfig() (*AgentConfig, error) {
 	flag.Parse()
 	givenFlags = getGivenFlags()
 
@@ -82,13 +78,11 @@ func parseConfig() (*ConfigBase, error) {
 		return nil, err
 	}
 
-	var cfg ConfigBase
-	err = gohcl.DecodeBody(f.Body, nil, &cfg)
+	var ac AgentConfig
+	err = gohcl.DecodeBody(f.Body, nil, &ac)
 	if err != nil {
 		return nil, err
 	}
-
-	ac := &cfg.AgentConfig
 
 	// TPMPath
 	if givenFlags[fnameTPMPath] || ac.TPMPath == nil {
@@ -125,7 +119,7 @@ func parseConfig() (*ConfigBase, error) {
 		ac.SerialNumber = *flagSerialNumber
 	}
 
-	return &cfg, nil
+	return &ac, nil
 }
 
 type LoadedConfig struct {
@@ -140,9 +134,7 @@ type LoadedConfig struct {
 	PlatformIdentity pkix.Name
 }
 
-func loadConfig(cfg *ConfigBase) (*LoadedConfig, error) {
-	ac := cfg.AgentConfig
-
+func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 	var rootCAs *x509.CertPool
 	if ac.CAPath != nil {
 		rootCAs = x509.NewCertPool()

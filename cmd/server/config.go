@@ -57,11 +57,7 @@ type ServerConfig struct {
 	CAInfo CAInfo `hcl:"ca_info,block"`
 }
 
-type ConfigBase struct {
-	ServerConfig ServerConfig `hcl:"server,block"`
-}
-
-func parseConfig() (*ConfigBase, error) {
+func parseConfig() (*ServerConfig, error) {
 	flag.Parse()
 
 	parser := hclparse.NewParser()
@@ -70,13 +66,11 @@ func parseConfig() (*ConfigBase, error) {
 		return nil, err
 	}
 
-	var cfg ConfigBase
-	err = gohcl.DecodeBody(f.Body, nil, &cfg)
+	var sc ServerConfig
+	err = gohcl.DecodeBody(f.Body, nil, &sc)
 	if err != nil {
 		return nil, err
 	}
-
-	sc := &cfg.ServerConfig
 
 	// BindAddress
 	if givenFlags[fnameBindAddress] || sc.BindAddress == nil {
@@ -93,7 +87,7 @@ func parseConfig() (*ConfigBase, error) {
 		return nil, fmt.Errorf("bind port out of range: %d", bindPort)
 	}
 
-	return &cfg, nil
+	return &sc, nil
 }
 
 type LoadedConfig struct {
@@ -105,9 +99,7 @@ type LoadedConfig struct {
 	SubjectExtras *common.DistinguishedName
 }
 
-func loadConfig(cfg *ConfigBase) (*LoadedConfig, error) {
-	sc := cfg.ServerConfig
-
+func loadConfig(sc *ServerConfig) (*LoadedConfig, error) {
 	caInfo := sc.CAInfo
 
 	var certPEMBlock, keyPEMBlock []byte
