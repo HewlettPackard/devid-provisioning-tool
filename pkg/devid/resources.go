@@ -56,21 +56,6 @@ func (rh *RequestResources) Activate(credentialBlob, secret []byte) ([]byte, err
 
 func createPolicySession(rw io.ReadWriter) (tpmutil.Handle, error) {
 	var nonceCaller [32]byte
-	// hSession, _, err := tpm2.StartAuthSessionEx(
-	// 	rw,
-	// 	tpm2.HandleNull,
-	// 	tpm2.HandleNull,
-	// 	nonceCaller[:],
-	// 	nil,
-	// 	tpm2.SessionPolicy,
-	// 	&tpm2.SymScheme{
-	// 		Alg:     tpm2.AlgXOR,
-	// 		KeyBits: uint16(tpm2.AlgSHA256),
-	// 		Mode:    tpm2.AlgNull,
-	// 	},
-	// 	tpm2.AlgSHA256,
-	// )
-
 	hSession, _, err := tpm2.StartAuthSession(
 		rw,
 		tpm2.HandleNull,
