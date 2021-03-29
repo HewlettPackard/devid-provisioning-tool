@@ -15,10 +15,17 @@ import (
 )
 
 const (
-	defaultTPMPath       = "/dev/tpmrm0"
-	defaultFilenameDevID = "devid.pem"
-	defaultFilenameAK    = "ak.pem"
-	defaultServerPort    = 8443
+	defaultTPMPath              = "/dev/tpmrm0"
+	defaultCredentialDir        = "."
+	defaultOutDevIDCertFilename = "devid-certificate.der"
+	defaultOutDevIDPrivFilename = "devid-private-key.blob"
+	defaultOutDevIDPubFilename  = "devid-public-key.blob"
+	defaultOutAKCertFilename    = "ak-certificate.der"
+	defaultOutAKPrivFilename    = "ak-private-key.blob"
+	defaultOutAKPubFilename     = "ak-public-key.blob"
+	defaultOutDevIDCredFilename = ""
+	defaultOutAKCredFilename    = ""
+	defaultServerPort           = 8443
 )
 
 const (
@@ -57,11 +64,19 @@ type AgentConfig struct {
 	ServerAddress      string  `hcl:"server_address"`
 	ServerPort         *int    `hcl:"server_port"`
 	InsecureConnection bool    `hcl:"insecure_connection,optional"`
-	CAPath             *string `hcl:"ca_path"`
+	CAPath             *string `hcl:"server_bundle_path"`
 
-	OutputCredentialsDir *string `hcl:"output_credentials_dir"`
-	OutputDevIDPath      *string `hcl:"output_devid_path"`
-	OutputAKPath         *string `hcl:"output_ak_path"`
+	OutCredentialsDir string `hcl:"out_dir,optional"`
+
+	OutDevIDCertFilename string `hcl:"out_devid_cert,optional"`
+	OutDevIDPrivFilename string `hcl:"out_devid_priv,optional"`
+	OutDevIDPubFilename  string `hcl:"out_devid_pub,optional"`
+	OutDevIDCredFilename string `hcl:"out_devid_credential,optional"`
+
+	OutAKCertFilename string `hcl:"out_ak_cert,optional"`
+	OutAKPrivFilename string `hcl:"out_ak_priv,optional"`
+	OutAKPubFilename  string `hcl:"out_ak_pub,optional"`
+	OutAKCredFilename string `hcl:"out_ak_credential,optional"`
 
 	SerialNumber  string                    `hcl:"serial_number,optional"`
 	CommonName    string                    `hcl:"common_name,optional"`
@@ -128,8 +143,15 @@ type LoadedConfig struct {
 	ServerAddress string
 	DialOptions   []grpc.DialOption
 
-	DevIDPath string
-	AKPath    string
+	DevIDCertPath string
+	DevIDPrivPath string
+	DevIDPubPath  string
+	DevIDCredPath string
+
+	AKCertPath string
+	AKPrivPath string
+	AKPubPath  string
+	AKCredPath string
 
 	PlatformIdentity pkix.Name
 }
@@ -157,7 +179,7 @@ func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 	tpmPath := filepath.Clean(*ac.TPMPath)
 
 	// DialOptions
-	dialOpts := []grpc.DialOption{grpc.WithBlock()}
+	dialOpts := []grpc.DialOption{}
 	if ac.InsecureConnection {
 		dialOpts = append(dialOpts, grpc.WithInsecure())
 	} else {
@@ -165,25 +187,41 @@ func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 		dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 	}
 
-	credentialDir := "."
-	if ac.OutputCredentialsDir != nil {
-		credentialDir = filepath.Clean(*ac.OutputCredentialsDir)
+	// Credential directory
+	if ac.OutCredentialsDir == "" {
+		ac.OutCredentialsDir = defaultCredentialDir
 	}
 
-	// DevIDPath
-	var devidPath string
-	if ac.OutputDevIDPath != nil {
-		devidPath = filepath.Clean(*ac.OutputDevIDPath)
-	} else {
-		devidPath = filepath.Join(credentialDir, defaultFilenameDevID)
+	// DevID
+	if ac.OutDevIDCertFilename == "" {
+		ac.OutDevIDCertFilename = defaultOutDevIDCertFilename
+	}
+	if ac.OutDevIDPrivFilename == "" {
+		ac.OutDevIDPrivFilename = defaultOutDevIDPrivFilename
+	}
+	if ac.OutDevIDPubFilename == "" {
+		ac.OutDevIDPubFilename = defaultOutDevIDPubFilename
 	}
 
-	// AKPath
-	var akPath string
-	if ac.OutputAKPath != nil {
-		akPath = filepath.Clean(*ac.OutputAKPath)
-	} else {
-		akPath = filepath.Join(credentialDir, defaultFilenameAK)
+	outDevIDCredPath := ""
+	if ac.OutDevIDCredFilename != "" {
+		outDevIDCredPath = filepath.Join(ac.OutCredentialsDir, ac.OutDevIDCredFilename)
+	}
+
+	// AK
+	if ac.OutAKCertFilename == "" {
+		ac.OutAKCertFilename = defaultOutAKCertFilename
+	}
+	if ac.OutAKPrivFilename == "" {
+		ac.OutAKPrivFilename = defaultOutAKPrivFilename
+	}
+	if ac.OutAKPubFilename == "" {
+		ac.OutAKPubFilename = defaultOutAKPubFilename
+	}
+
+	outAKCredPath := ""
+	if ac.OutAKCredFilename != "" {
+		outDevIDCredPath = filepath.Join(ac.OutCredentialsDir, ac.OutAKCredFilename)
 	}
 
 	// PlatformIdentity
@@ -198,8 +236,15 @@ func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 		ServerAddress: fmt.Sprintf("%s:%d", ac.ServerAddress, *ac.ServerPort),
 		DialOptions:   dialOpts,
 
-		DevIDPath: devidPath,
-		AKPath:    akPath,
+		DevIDCertPath: filepath.Join(ac.OutCredentialsDir, ac.OutDevIDCertFilename),
+		DevIDPrivPath: filepath.Join(ac.OutCredentialsDir, ac.OutDevIDPrivFilename),
+		DevIDPubPath:  filepath.Join(ac.OutCredentialsDir, ac.OutDevIDPubFilename),
+		DevIDCredPath: outDevIDCredPath,
+
+		AKCertPath: filepath.Join(ac.OutCredentialsDir, ac.OutAKCertFilename),
+		AKPrivPath: filepath.Join(ac.OutCredentialsDir, ac.OutAKPrivFilename),
+		AKPubPath:  filepath.Join(ac.OutCredentialsDir, ac.OutAKPubFilename),
+		AKCredPath: outAKCredPath,
 
 		PlatformIdentity: platformIdentity,
 	}, nil

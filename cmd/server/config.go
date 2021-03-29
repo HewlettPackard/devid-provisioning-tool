@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -49,12 +50,12 @@ type CAInfo struct {
 }
 
 type ServerConfig struct {
-	BindAddress *string `hcl:"bind_address"`
-	BindPort    *int    `hcl:"bind_port"`
-
-	CABundlePath []string `hcl:"ca_bundle_paths"`
-
-	CAInfo CAInfo `hcl:"ca_info,block"`
+	BindAddress           *string  `hcl:"bind_address"`
+	BindPort              *int     `hcl:"bind_port"`
+	CertificatePath       string   `hcl:"certificate_path,optional"`
+	PrivateKeyPath        string   `hcl:"private_key_path,optional"`
+	EndorsementBundlePath []string `hcl:"endorsement_bundle_paths"`
+	CAInfo                CAInfo   `hcl:"ca,block"`
 }
 
 func parseConfig() (*ServerConfig, error) {
@@ -125,8 +126,26 @@ func loadConfig(sc *ServerConfig) (*LoadedConfig, error) {
 		return nil, err
 	}
 
+	var tlsCertificate tls.Certificate
+	switch {
+	case sc.CertificatePath == "" && sc.PrivateKeyPath == "":
+		log.Println("No TLS credentials provided, serving insecure connection")
+
+	case sc.CertificatePath == "":
+		return nil, fmt.Errorf("empty certificate_path")
+
+	case sc.PrivateKeyPath == "":
+		return nil, fmt.Errorf("empty private_key_path")
+
+	default:
+		tlsCertificate, err = tls.LoadX509KeyPair(caInfo.CertificatePath, *caInfo.PrivateKeyPath)
+		if err != nil {
+			return nil, fmt.Errorf("cannot load key pair: %v", err)
+		}
+	}
+
 	endorsementRoots := x509.NewCertPool()
-	err = common.ReadCertificatesFromPEMFiles(endorsementRoots, sc.CABundlePath...)
+	err = common.ReadCertificatesFromPEMFiles(endorsementRoots, sc.EndorsementBundlePath...)
 	if err != nil {
 		err = fmt.Errorf("could not load EK root CAs: %w", err)
 		return nil, err
@@ -142,5 +161,6 @@ func loadConfig(sc *ServerConfig) (*LoadedConfig, error) {
 		EndorsementRoots:     endorsementRoots,
 		CertificateAuthority: ca,
 		SubjectExtras:        sc.CAInfo.SubjectExtras,
+		TLSCertificate:       &tlsCertificate,
 	}, nil
 }
