@@ -143,10 +143,10 @@ func doEnrollSequence(
 }
 
 func getKeygen() *keygen.Keygen {
-	auroraSRKTemplate := tpm2tools.SRKTemplateRSA()
-	auroraSRKTemplate.RSAParameters.ModulusRaw = []byte{}
+	srkTemplateHighRSA := tpm2tools.SRKTemplateRSA()
+	srkTemplateHighRSA.RSAParameters.ModulusRaw = []byte{}
 
-	return keygen.New(keygen.UseSRKTemplate(auroraSRKTemplate))
+	return keygen.New(keygen.UseSRKTemplate(srkTemplateHighRSA))
 }
 
 func createRawRequest(ctx context.Context, rw io.ReadWriter, pi pkix.Name) (data, signature []byte, resources *devid.RequestResources, err error) {
