@@ -20,8 +20,8 @@ import (
 	"errors"
 	"fmt"
 
+	enrollapi "github.com/HewlettPackard/devid-provisioning-tool/proto/enrollapi"
 	"github.com/google/go-tpm/tpm2"
-	enrollapi "github.hpe.com/langbeck/tpm2-keys/proto/enrollapi"
 	"google.golang.org/protobuf/proto"
 )
 

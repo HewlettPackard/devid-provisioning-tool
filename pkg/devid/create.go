@@ -20,10 +20,10 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/agent/keygen"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common/logger"
 	"github.com/google/go-tpm/tpm2"
 	"github.com/google/go-tpm/tpmutil"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/agent/keygen"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/common/logger"
 )
 
 const EKRSACertificateHandle = tpmutil.Handle(0x01c00002)

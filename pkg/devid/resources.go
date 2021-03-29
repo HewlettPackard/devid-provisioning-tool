@@ -16,9 +16,9 @@ package devid
 import (
 	"io"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/agent/keygen"
 	"github.com/google/go-tpm/tpm2"
 	"github.com/google/go-tpm/tpmutil"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/agent/keygen"
 )
 
 type RequestResources struct {

@@ -17,7 +17,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.hpe.com/langbeck/tpm2-keys/proto/enrollapi"
+	"github.com/HewlettPackard/devid-provisioning-tool/proto/enrollapi"
 	"google.golang.org/grpc"
 )
 

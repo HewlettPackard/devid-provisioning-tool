@@ -23,12 +23,12 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/agent/keygen"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common/logger"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/devid"
 	"github.com/google/go-tpm-tools/tpm2tools"
 	"github.com/google/go-tpm/tpm2"
 	"github.com/sirupsen/logrus"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/agent/keygen"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/common/logger"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/devid"
 	"google.golang.org/grpc"
 )
 

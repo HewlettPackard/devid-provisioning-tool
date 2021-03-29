@@ -22,10 +22,10 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/x509ca"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/common"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/x509ca"
 )
 
 const (

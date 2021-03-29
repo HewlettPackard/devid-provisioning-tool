@@ -26,12 +26,12 @@ import (
 	"net"
 	"time"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/devid"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/x509ca"
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/x509tcg"
+	"github.com/HewlettPackard/devid-provisioning-tool/proto/enrollapi"
 	"github.com/google/go-tpm/tpm2"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/common"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/devid"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/x509ca"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/x509tcg"
-	"github.hpe.com/langbeck/tpm2-keys/proto/enrollapi"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

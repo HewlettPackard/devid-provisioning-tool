@@ -1,4 +1,4 @@
-module github.hpe.com/langbeck/tpm2-keys
+module github.com/HewlettPackard/devid-provisioning-tool
 
 go 1.13
 

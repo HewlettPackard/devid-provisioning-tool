@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/devid"
 	"github.com/google/go-tpm/tpm2"
 	"github.com/google/go-tpm/tpm2/credactivation"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/devid"
 )
 
 type KeyAttributeError struct {

@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.hpe.com/langbeck/tpm2-keys/pkg/common"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

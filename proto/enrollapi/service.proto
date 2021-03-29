@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.hpe.com/langbeck/tpm2-keys/proto/enrollapi";
+option go_package = "github.com/HewlettPackard/devid-provisioning-tool/proto/enrollapi";
 
 
 message SigningRequest {
