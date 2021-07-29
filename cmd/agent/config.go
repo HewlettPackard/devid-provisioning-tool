@@ -30,14 +30,9 @@ import (
 const (
 	defaultTPMPath              = "/dev/tpmrm0"
 	defaultCredentialDir        = "."
-	defaultOutDevIDCertFilename = "devid-certificate.der"
+	defaultOutDevIDCertFilename = "devid-certificate.pem"
 	defaultOutDevIDPrivFilename = "devid-private-key.blob"
 	defaultOutDevIDPubFilename  = "devid-public-key.blob"
-	defaultOutAKCertFilename    = "ak-certificate.der"
-	defaultOutAKPrivFilename    = "ak-private-key.blob"
-	defaultOutAKPubFilename     = "ak-public-key.blob"
-	defaultOutDevIDCredFilename = ""
-	defaultOutAKCredFilename    = ""
 	defaultServerPort           = 8443
 )
 
@@ -84,12 +79,6 @@ type AgentConfig struct {
 	OutDevIDCertFilename string `hcl:"out_devid_cert,optional"`
 	OutDevIDPrivFilename string `hcl:"out_devid_priv,optional"`
 	OutDevIDPubFilename  string `hcl:"out_devid_pub,optional"`
-	OutDevIDCredFilename string `hcl:"out_devid_credential,optional"`
-
-	OutAKCertFilename string `hcl:"out_ak_cert,optional"`
-	OutAKPrivFilename string `hcl:"out_ak_priv,optional"`
-	OutAKPubFilename  string `hcl:"out_ak_pub,optional"`
-	OutAKCredFilename string `hcl:"out_ak_credential,optional"`
 
 	SerialNumber  string                    `hcl:"serial_number,optional"`
 	CommonName    string                    `hcl:"common_name,optional"`
@@ -159,12 +148,6 @@ type LoadedConfig struct {
 	DevIDCertPath string
 	DevIDPrivPath string
 	DevIDPubPath  string
-	DevIDCredPath string
-
-	AKCertPath string
-	AKPrivPath string
-	AKPubPath  string
-	AKCredPath string
 
 	PlatformIdentity pkix.Name
 }
@@ -216,27 +199,6 @@ func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 		ac.OutDevIDPubFilename = defaultOutDevIDPubFilename
 	}
 
-	outDevIDCredPath := ""
-	if ac.OutDevIDCredFilename != "" {
-		outDevIDCredPath = filepath.Join(ac.OutCredentialsDir, ac.OutDevIDCredFilename)
-	}
-
-	// AK
-	if ac.OutAKCertFilename == "" {
-		ac.OutAKCertFilename = defaultOutAKCertFilename
-	}
-	if ac.OutAKPrivFilename == "" {
-		ac.OutAKPrivFilename = defaultOutAKPrivFilename
-	}
-	if ac.OutAKPubFilename == "" {
-		ac.OutAKPubFilename = defaultOutAKPubFilename
-	}
-
-	outAKCredPath := ""
-	if ac.OutAKCredFilename != "" {
-		outDevIDCredPath = filepath.Join(ac.OutCredentialsDir, ac.OutAKCredFilename)
-	}
-
 	// PlatformIdentity
 	var platformIdentity pkix.Name
 	ac.SubjectExtras.AppendInto(&platformIdentity)
@@ -252,12 +214,6 @@ func loadConfig(ac *AgentConfig) (*LoadedConfig, error) {
 		DevIDCertPath: filepath.Join(ac.OutCredentialsDir, ac.OutDevIDCertFilename),
 		DevIDPrivPath: filepath.Join(ac.OutCredentialsDir, ac.OutDevIDPrivFilename),
 		DevIDPubPath:  filepath.Join(ac.OutCredentialsDir, ac.OutDevIDPubFilename),
-		DevIDCredPath: outDevIDCredPath,
-
-		AKCertPath: filepath.Join(ac.OutCredentialsDir, ac.OutAKCertFilename),
-		AKPrivPath: filepath.Join(ac.OutCredentialsDir, ac.OutAKPrivFilename),
-		AKPubPath:  filepath.Join(ac.OutCredentialsDir, ac.OutAKPubFilename),
-		AKCredPath: outAKCredPath,
 
 		PlatformIdentity: platformIdentity,
 	}, nil
