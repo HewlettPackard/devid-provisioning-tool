@@ -17,8 +17,10 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/asn1"
+	"errors"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/HewlettPackard/devid-provisioning-tool/pkg/agent/keygen"
 	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common/logger"
@@ -94,7 +96,7 @@ func CreateSigningRequest(ctx context.Context, kgen *keygen.Keygen, rw io.ReadWr
 	resources.DevID = devID
 
 	log.Info("Certifying TPM-residency of keys")
-	certifyBytes, certifySig, err := tpm2.Certify(rw, "", "", devID.Handle, ak.Handle, nil)
+	certifyBytes, certifySig, err := certify(rw, devID.Handle, ak.Handle)
 	if err != nil {
 		err = fmt.Errorf("tpm2.Certify failed: %w", err)
 		return
@@ -113,4 +115,30 @@ func CreateSigningRequest(ctx context.Context, kgen *keygen.Keygen, rw io.ReadWr
 	}
 
 	return
+}
+
+func certify(rw io.ReadWriter, object, signer tpmutil.Handle) ([]byte, []byte, error) {
+	maxAttempts := 5
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		certifyBytes, certifySig, err := tpm2.Certify(rw, "", "", object, signer, nil)
+		switch {
+		case err == nil:
+			return certifyBytes, certifySig, nil
+		case isRetry(err):
+			time.Sleep(time.Millisecond * 500)
+		default:
+			return nil, nil, err
+		}
+	}
+
+	return nil, nil, fmt.Errorf("max attempts reached while trying to certify key")
+}
+
+// isRetry returns true if the given error is a tpm2.Warning that requests retry.
+func isRetry(err error) bool {
+	target := &tpm2.Warning{Code: tpm2.RCRetry}
+	if errors.As(err, target) && target.Code == tpm2.RCRetry {
+		return true
+	}
+	return false
 }
