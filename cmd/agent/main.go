@@ -189,65 +189,30 @@ func createRawRequest(ctx context.Context, rw io.ReadWriter, pi pkix.Name) (data
 }
 
 func writeCredentials(cfg *LoadedConfig, resources *devid.RequestResources, attestCert, devIDCert []byte) error {
-	// Write DevID
-	err := ioutil.WriteFile(cfg.DevIDCertPath, devIDCert, defaultCredentialPerm)
+	// Write DevID certificate
+	var devIDCertPem bytes.Buffer
+	err := pem.Encode(&devIDCertPem, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: devIDCert,
+	})
+	if err != nil {
+		return fmt.Errorf("certificate PEM encoding failed: %w", err)
+	}
+	err = ioutil.WriteFile(cfg.DevIDCertPath, devIDCertPem.Bytes(), defaultCredentialPerm)
 	if err != nil {
 		return fmt.Errorf("writing DevID certificate at %q failed: %w", cfg.DevIDCertPath, err)
 	}
 
+	// Write DevID private blob
 	err = ioutil.WriteFile(cfg.DevIDPrivPath, resources.DevID.PrivateBlob, defaultCredentialPerm)
 	if err != nil {
 		return fmt.Errorf("writing DevID private key at %q failed: %w", cfg.DevIDPrivPath, err)
 	}
 
+	// Write DevID public blob
 	err = ioutil.WriteFile(cfg.DevIDPubPath, resources.DevID.PublicBlob, defaultCredentialPerm)
 	if err != nil {
 		return fmt.Errorf("writing DevID public key at %q failed: %w", cfg.DevIDPubPath, err)
-	}
-
-	// Optionally print single PEM file including all DevID credentials
-	if cfg.DevIDCredPath != "" {
-		devIDData, err := credentialToPEM(resources.DevID, devIDCert)
-		if err != nil {
-			err = fmt.Errorf("DevID PEM encoding failed: %w", err)
-			return err
-		}
-
-		err = ioutil.WriteFile(cfg.DevIDCredPath, devIDData, defaultCredentialPerm)
-		if err != nil {
-			return fmt.Errorf("writing DevID credentials at %q failed: %w", cfg.DevIDCredPath, err)
-		}
-	}
-
-	// Write AK
-	err = ioutil.WriteFile(cfg.AKCertPath, attestCert, defaultCredentialPerm)
-	if err != nil {
-		return fmt.Errorf("writing AK certificate at %q failed: %w", cfg.AKCertPath, err)
-	}
-
-	err = ioutil.WriteFile(cfg.AKPrivPath, resources.Attestation.PrivateBlob, defaultCredentialPerm)
-	if err != nil {
-		return fmt.Errorf("writing AK private key at %q failed: %w", cfg.AKPrivPath, err)
-	}
-
-	err = ioutil.WriteFile(cfg.AKPubPath, resources.Attestation.PublicBlob, defaultCredentialPerm)
-	if err != nil {
-		return fmt.Errorf("writing AK public key at %q failed: %w", cfg.AKPubPath, err)
-	}
-
-	// Optionally print single PEM file including all AK credentials
-	if cfg.AKCredPath != "" {
-		attestData, err := credentialToPEM(resources.Attestation, attestCert)
-		if err != nil {
-			err = fmt.Errorf("AK PEM encoding failed: %w", err)
-			return err
-		}
-
-		err = ioutil.WriteFile(cfg.AKCredPath, attestData, defaultCredentialPerm)
-		if err != nil {
-			err = fmt.Errorf("writing AK credentials at %q failed: %w", cfg.AKCredPath, err)
-			return err
-		}
 	}
 
 	return nil
