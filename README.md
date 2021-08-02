@@ -19,12 +19,12 @@ Example files are provided for the [agent](conf/agent/agent.conf) and [server](c
 
 1. Run the provisioning service
 ```
-./server
+./bin/provisioning-server
 ```
 
 2. Run the provisioning agent
 ```
-./agent
+./bin/provisioning-agent
 ```
 
 The agent provisions the TPM and outputs the DevID certificate and keys in the current folder by default.
