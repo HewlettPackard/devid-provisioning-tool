@@ -22,6 +22,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/HewlettPackard/devid-provisioning-tool/pkg/agent/keygen"
 	"github.com/HewlettPackard/devid-provisioning-tool/pkg/common/logger"
@@ -189,6 +190,15 @@ func createRawRequest(ctx context.Context, rw io.ReadWriter, pi pkix.Name) (data
 }
 
 func writeCredentials(cfg *LoadedConfig, resources *devid.RequestResources, attestCert, devIDCert []byte) error {
+	// Create directory if it does not exists
+	directoryPath := filepath.Dir(cfg.DevIDCertPath)
+	if _, err := os.Stat(directoryPath); os.IsNotExist(err) {
+		err := os.Mkdir(directoryPath, 0755)
+		if err != nil {
+			return fmt.Errorf("unable to create output directory: %w", err)
+		}
+	}
+
 	// Write DevID certificate
 	var devIDCertPem bytes.Buffer
 	err := pem.Encode(&devIDCertPem, &pem.Block{
