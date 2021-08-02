@@ -46,7 +46,7 @@ const (
 )
 
 var (
-	flagConfigPath    = flag.String("config", "agent.conf", "Agent configuration file")
+	flagConfigPath    = flag.String("config", "conf/agent/agent.conf", "Agent configuration file")
 	flagTPMPath       = flag.String(fnameTPMPath, defaultTPMPath, "Location of the TPM device")
 	flagServerAddress = flag.String(fnameServerAddress, "", "IP address or DNS name of the provisioning server")
 	flagServerPort    = flag.Int(fnameServerPort, defaultServerPort, "Port number of the provisioning server")
@@ -72,7 +72,7 @@ type AgentConfig struct {
 	ServerAddress      string  `hcl:"server_address"`
 	ServerPort         *int    `hcl:"server_port"`
 	InsecureConnection bool    `hcl:"insecure_connection,optional"`
-	CAPath             *string `hcl:"server_bundle_path"`
+	CAPath             *string `hcl:"server_ca_path"`
 
 	OutCredentialsDir string `hcl:"out_dir,optional"`
 

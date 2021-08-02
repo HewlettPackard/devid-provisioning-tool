@@ -12,7 +12,7 @@ make build
 ```
 
 ## Configure
-Example files are provided for the [agent](agent.conf) and [server](server.conf) component.
+Example files are provided for the [agent](conf/agent/agent.conf) and [server](conf/server/server.conf) component.
 
 
 ## Run

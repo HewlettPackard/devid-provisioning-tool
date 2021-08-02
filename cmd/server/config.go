@@ -39,7 +39,7 @@ const (
 )
 
 var (
-	flagConfigPath  = flag.String("config", "server.conf", "Server configuration file")
+	flagConfigPath  = flag.String("config", "conf/server/server.conf", "Server configuration file")
 	flagBindAddress = flag.String(fnameBindAddress, defaultBindAddress, "IP address or DNS name of the provisioning server")
 	flagBindPort    = flag.Int(fnameBindPort, defaultBindPort, "Port number of the provisioning server")
 )
@@ -68,7 +68,7 @@ type ServerConfig struct {
 	CertificatePath       string   `hcl:"certificate_path,optional"`
 	PrivateKeyPath        string   `hcl:"private_key_path,optional"`
 	EndorsementBundlePath []string `hcl:"endorsement_bundle_paths"`
-	CAInfo                CAInfo   `hcl:"ca,block"`
+	CAInfo                CAInfo   `hcl:"provisioning_ca,block"`
 }
 
 func parseConfig() (*ServerConfig, error) {
@@ -151,7 +151,7 @@ func loadConfig(sc *ServerConfig) (*LoadedConfig, error) {
 		return nil, fmt.Errorf("empty private_key_path")
 
 	default:
-		tlsCertificate, err = tls.LoadX509KeyPair(caInfo.CertificatePath, *caInfo.PrivateKeyPath)
+		tlsCertificate, err = tls.LoadX509KeyPair(sc.CertificatePath, sc.PrivateKeyPath)
 		if err != nil {
 			return nil, fmt.Errorf("cannot load key pair: %v", err)
 		}

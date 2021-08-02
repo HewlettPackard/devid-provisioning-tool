@@ -1,4 +1,4 @@
 build: 
-	go build ./cmd/agent
-	go build ./cmd/server
+	go build -o ./bin/agent/provisioning-agent ./cmd/agent
+	go build -o ./bin/server/provisioning-server ./cmd/server
 
